@@ -98,7 +98,8 @@ if (!empty($config->availabilityDomains)) {
 foreach ($availabilityDomains as $availabilityDomainEntity) {
     $availabilityDomain = is_array($availabilityDomainEntity) ? $availabilityDomainEntity['name'] : $availabilityDomainEntity;
     try {
-        $instanceDetails = $api->createInstance($config, $shape, getenv('OCI_SSH_PUBLIC_KEY'), $availabilityDomain);
+        $sshKeyClean = trim(preg_replace('/\s+/', ' ', (string)getenv('OCI_SSH_PUBLIC_KEY')));
+$instanceDetails = $api->createInstance($config, $shape, $sshKeyClean, $availabilityDomain);
     } catch(ApiCallException $e) {
        $message = $e->getMessage();
 echo "=== ERROR DETALLADO OCI ===" . PHP_EOL;
