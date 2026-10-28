@@ -37,11 +37,10 @@ $config = new OciConfig(
     (int) getenv('OCI_MEMORY_IN_GBS')
 );
 echo "=== DIAGNÓSTICO DE CONFIGURACIÓN ===" . PHP_EOL;
+echo "Region: " . getenv('OCI_REGION') . PHP_EOL;
 echo "Subnet ID: " . $config->subnetId . PHP_EOL;
 echo "Image ID: " . $config->imageId . PHP_EOL;
-echo "OCPUs: " . $config->ocpus . PHP_EOL;
-echo "Memory: " . $config->memoryInGBs . PHP_EOL;
-echo "SSH Key length: " . strlen((string)getenv('OCI_SSH_PUBLIC_KEY')) . PHP_EOL;
+echo "Availability Domain: " . ($config->availabilityDomains ? json_encode($config->availabilityDomains) : 'NULL (Consulta dinamica)') . PHP_EOL;
 echo "====================================" . PHP_EOL;
 $bootVolumeSizeInGBs = (string) getenv('OCI_BOOT_VOLUME_SIZE_IN_GBS');
 $bootVolumeId = (string) getenv('OCI_BOOT_VOLUME_ID');
