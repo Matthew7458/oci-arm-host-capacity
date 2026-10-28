@@ -35,17 +35,19 @@ jobs:
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_OCID }}
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_OCID }}
           OCI_AVAILABILITY_DOMAIN: 'sa-santiago-1-AD-1'
-          OCI_AVAILABILITY_DOMAIN_NAME: 'sa-santiago-1-AD-1'
-          OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
-          OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
+          OCI_OCPUS: '4'
+          OCI_MEMORY_IN_GBS: '24'
           OCI_SHAPE: 'VM.Standard.A1.Flex'
           OCI_MAX_INSTANCES_IN_ANY_STATE: '1'
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
-          # Aliases de compatibilidad
+          # Aliases y respaldos
           OCI_KEY_FILE: key.pem
           OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
           OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
           OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
           OCI_SUBNET_OCID: ${{ secrets.OCI_SUBNET_OCID }}
           OCI_IMAGE_OCID: ${{ secrets.OCI_IMAGE_OCID }}
-        run: php index.php
+        run: |
+          # Limpiamos posibles comillas o espacios en el secret SSH
+          export OCI_SSH_PUBLIC_KEY="$(echo "${{ secrets.OCI_SSH_PUBLIC_KEY }}" | tr -d '\r\n')"
+          php index.php
