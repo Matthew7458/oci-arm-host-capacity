@@ -35,11 +35,12 @@ jobs:
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_OCID }}
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_OCID }}
           OCI_AVAILABILITY_DOMAIN: 'sa-santiago-1-AD-1'
+          OCI_AVAILABILITY_DOMAIN_NAME: 'sa-santiago-1-AD-1'
           OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
           OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
           OCI_SHAPE: 'VM.Standard.A1.Flex'
           OCI_MAX_INSTANCES_IN_ANY_STATE: '1'
-          OCI_SSH_PUBLIC_KEY: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI1234567890dummykeyforprovisioning'
+          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
           # Aliases de compatibilidad
           OCI_KEY_FILE: key.pem
           OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
