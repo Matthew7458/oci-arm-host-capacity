@@ -1,24 +1,4 @@
-name: OCI Instance Auto Provisioner
-
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '*/10 * * * *'
-
-jobs:
-  provision:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Launch OCI Instance via OCI CLI
+- name: Launch OCI Instance via OCI CLI
         env:
           OCI_CLI_USER: ${{ secrets.OCI_USER_OCID }}
           OCI_CLI_TENANCY: ${{ secrets.OCI_TENANCY_OCID }}
@@ -28,17 +8,22 @@ jobs:
         run: |
           pip install oci-cli --quiet
 
-          # Guardar clave publica SSH limpia
+          # Sanitizar variables de entorno eliminando saltos de línea invisibles
+          export OCI_CLI_USER=$(echo "$OCI_CLI_USER" | tr -d '\r\n ')
+          export OCI_CLI_TENANCY=$(echo "$OCI_CLI_TENANCY" | tr -d '\r\n ')
+          export OCI_CLI_FINGERPRINT=$(echo "$OCI_CLI_FINGERPRINT" | tr -d '\r\n ')
+
+          # Guardar clave pública SSH limpia
           echo "${{ secrets.OCI_SSH_PUBLIC_KEY }}" | tr -d '\r' > ssh_key.pub
 
-          # Obtener el Availability Domain dinamico de Santiago
+          # Obtener el Availability Domain dinámico de Santiago
           AD_NAME=$(oci iam availability-domain list --query "data[0].name" --raw-output)
           echo "Target Availability Domain: $AD_NAME"
 
           # Intentar crear la instancia
           oci compute instance launch \
             --availability-domain "$AD_NAME" \
-            --compartment-id "${{ secrets.OCI_TENANCY_OCID }}" \
+            --compartment-id "$OCI_CLI_TENANCY" \
             --shape "VM.Standard.A1.Flex" \
             --shape-config '{"ocpus": 4, "memory_in_gbs": 24}' \
             --image-id "${{ secrets.OCI_IMAGE_OCID }}" \
