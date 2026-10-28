@@ -22,13 +22,20 @@ jobs:
 
       - name: Execute OCI Provisioner
         env:
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_USER_ID: ${{ secrets.OCI_USER_OCID }}
+          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_KEY_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_PRIVATE_KEY_FILENAME: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_OCID }}
+          OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_OCID }}
+          OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
+          OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
+          # Aliases de compatibilidad adicional
           OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
           OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
           OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
-          OCI_REGION: ${{ secrets.OCI_REGION }}
           OCI_SUBNET_OCID: ${{ secrets.OCI_SUBNET_OCID }}
           OCI_IMAGE_OCID: ${{ secrets.OCI_IMAGE_OCID }}
-          OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
-          OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
         run: php index.php
