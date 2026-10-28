@@ -1,59 +1,29 @@
-name: OCI Instance Auto Provisioner
+- name: Launch OCI Instance via OCI CLI
+      env:
+        OCI_CLI_USER: ${{ secrets.OCI_USER_OCID }}
+        OCI_CLI_TENANCY: ${{ secrets.OCI_TENANCY_OCID }}
+        OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+        OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY }}
+        OCI_CLI_REGION: "sa-santiago-1"
+      run: |
+        # Install OCI CLI
+        pip install oci-cli --quiet
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '*/10 * * * *'
+        # Save SSH Public Key
+        echo "${{ secrets.OCI_SSH_PUBLIC_KEY }}" | tr -d '\r' > ssh_key.pub
 
-jobs:
-  run-script:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+        # Get Availability Domain dynamically for sa-santiago-1
+        AD_NAME=$(oci iam availability-domain list --query "data[0].name" --raw-output)
+        echo "Target Availability Domain: $AD_NAME"
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-
-      - name: Install dependencies
-        run: composer install
-
-      - name: Create API Private Key File
-        run: |
-          echo "${{ secrets.OCI_PRIVATE_KEY }}" > key.pem
-          chmod 600 key.pem
-
-      - name: Execute OCI Provisioner
-        run: |
-          # Limpiamos saltos de línea y formateamos la clave SSH
-          SSH_KEY=$(echo "${{ secrets.OCI_SSH_PUBLIC_KEY }}" | tr -d '\r' | tr '\n' ' ' | xargs)
-
-          export OCI_REGION="${{ secrets.OCI_REGION }}"
-          export OCI_USER_ID="${{ secrets.OCI_USER_OCID }}"
-          export OCI_TENANCY_ID="${{ secrets.OCI_TENANCY_OCID }}"
-          export OCI_KEY_FINGERPRINT="${{ secrets.OCI_FINGERPRINT }}"
-          export OCI_PRIVATE_KEY_FILENAME="key.pem"
-          export OCI_SUBNET_ID="${{ secrets.OCI_SUBNET_OCID }}"
-          export OCI_IMAGE_ID="${{ secrets.OCI_IMAGE_OCID }}"
-          export OCI_AVAILABILITY_DOMAIN=""
-          export OCI_OCPUS="4"
-          export OCI_MEMORY_IN_GBS="24"
-          export OCI_SHAPE="VM.Standard.A1.Flex"
-          export OCI_MAX_INSTANCES_IN_ANY_STATE="1"
-          export OCI_SSH_PUBLIC_KEY="$SSH_KEY"
-          
-          # Aliases de compatibilidad
-          export OCI_KEY_FILE="key.pem"
-          export OCI_USER_OCID="${{ secrets.OCI_USER_OCID }}"
-          export OCI_TENANCY_OCID="${{ secrets.OCI_TENANCY_OCID }}"
-          export OCI_FINGERPRINT="${{ secrets.OCI_FINGERPRINT }}"
-          export OCI_SUBNET_OCID="${{ secrets.OCI_SUBNET_OCID }}"
-          export OCI_IMAGE_OCID="${{ secrets.OCI_IMAGE_OCID }}"
-
-          # Diagnóstico rápido de variables no confidenciales
-          echo "Subnet OCID configurado: $OCI_SUBNET_ID"
-          echo "Image OCID configurado: $OCI_IMAGE_ID"
-          
-          php index.php
+        # Try launching the instance
+        oci compute instance launch \
+          --availability-domain "$AD_NAME" \
+          --compartment-id "${{ secrets.OCI_TENANCY_OCID }}" \
+          --shape "VM.Standard.A1.Flex" \
+          --shape-config '{"ocpus": 4, "memory_in_gbs": 24}' \
+          --image-id "${{ secrets.OCI_IMAGE_OCID }}" \
+          --subnet-id "${{ secrets.OCI_SUBNET_OCID }}" \
+          --ssh-authorized-keys-file ssh_key.pub \
+          --assign-public-ip true \
+          --display-name "ARM-Santiago-Instance"
