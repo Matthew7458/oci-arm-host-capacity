@@ -37,7 +37,7 @@ jobs:
           export OCI_PRIVATE_KEY_FILENAME="key.pem"
           export OCI_SUBNET_ID="${{ secrets.OCI_SUBNET_OCID }}"
           export OCI_IMAGE_ID="${{ secrets.OCI_IMAGE_OCID }}"
-          export OCI_AVAILABILITY_DOMAIN="sa-santiago-1-AD-1"
+          export OCI_AVAILABILITY_DOMAIN=""
           export OCI_OCPUS="4"
           export OCI_MEMORY_IN_GBS="24"
           export OCI_SHAPE="VM.Standard.A1.Flex"
