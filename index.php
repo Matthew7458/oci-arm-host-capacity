@@ -36,7 +36,13 @@ $config = new OciConfig(
     (int) getenv('OCI_OCPUS'),
     (int) getenv('OCI_MEMORY_IN_GBS')
 );
-
+echo "=== DIAGNÓSTICO DE CONFIGURACIÓN ===" . PHP_EOL;
+echo "Subnet ID: " . $config->subnetId . PHP_EOL;
+echo "Image ID: " . $config->imageId . PHP_EOL;
+echo "OCPUs: " . $config->ocpus . PHP_EOL;
+echo "Memory: " . $config->memoryInGBs . PHP_EOL;
+echo "SSH Key length: " . strlen((string)getenv('OCI_SSH_PUBLIC_KEY')) . PHP_EOL;
+echo "====================================" . PHP_EOL;
 $bootVolumeSizeInGBs = (string) getenv('OCI_BOOT_VOLUME_SIZE_IN_GBS');
 $bootVolumeId = (string) getenv('OCI_BOOT_VOLUME_ID');
 if ($bootVolumeSizeInGBs) {
@@ -94,8 +100,11 @@ foreach ($availabilityDomains as $availabilityDomainEntity) {
     try {
         $instanceDetails = $api->createInstance($config, $shape, getenv('OCI_SSH_PUBLIC_KEY'), $availabilityDomain);
     } catch(ApiCallException $e) {
-        $message = $e->getMessage();
-        echo "$message\n";
+       $message = $e->getMessage();
+echo "=== ERROR DETALLADO OCI ===" . PHP_EOL;
+echo "Código HTTP: " . $e->getCode() . PHP_EOL;
+echo "Mensaje: " . $message . PHP_EOL;
+echo "===========================" . PHP_EOL;
 //            if ($notifier->isSupported()) {
 //                $notifier->notify($message);
 //            }
