@@ -34,6 +34,7 @@ jobs:
           OCI_PRIVATE_KEY_FILENAME: key.pem
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_OCID }}
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_OCID }}
+          OCI_AVAILABILITY_DOMAIN: 'sa-santiago-1-AD-1'
           OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
           OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
           OCI_SHAPE: 'VM.Standard.A1.Flex'
