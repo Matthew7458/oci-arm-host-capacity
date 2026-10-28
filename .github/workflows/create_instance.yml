@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: composer install
 
-      - name: Create SSH Key File
+      - name: Create API Private Key File
         run: |
           echo "${{ secrets.OCI_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
@@ -38,6 +38,7 @@ jobs:
           OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
           OCI_SHAPE: 'VM.Standard.A1.Flex'
           OCI_MAX_INSTANCES_IN_ANY_STATE: '1'
+          OCI_SSH_PUBLIC_KEY: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI1234567890dummykeyforprovisioning'
           # Aliases de compatibilidad
           OCI_KEY_FILE: key.pem
           OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
