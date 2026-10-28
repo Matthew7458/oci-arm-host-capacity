@@ -1,29 +1,48 @@
-- name: Launch OCI Instance via OCI CLI
-      env:
-        OCI_CLI_USER: ${{ secrets.OCI_USER_OCID }}
-        OCI_CLI_TENANCY: ${{ secrets.OCI_TENANCY_OCID }}
-        OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-        OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY }}
-        OCI_CLI_REGION: "sa-santiago-1"
-      run: |
-        # Install OCI CLI
-        pip install oci-cli --quiet
+name: OCI Instance Auto Provisioner
 
-        # Save SSH Public Key
-        echo "${{ secrets.OCI_SSH_PUBLIC_KEY }}" | tr -d '\r' > ssh_key.pub
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'
 
-        # Get Availability Domain dynamically for sa-santiago-1
-        AD_NAME=$(oci iam availability-domain list --query "data[0].name" --raw-output)
-        echo "Target Availability Domain: $AD_NAME"
+jobs:
+  provision:
+    runs-on: ubuntu-latest
 
-        # Try launching the instance
-        oci compute instance launch \
-          --availability-domain "$AD_NAME" \
-          --compartment-id "${{ secrets.OCI_TENANCY_OCID }}" \
-          --shape "VM.Standard.A1.Flex" \
-          --shape-config '{"ocpus": 4, "memory_in_gbs": 24}' \
-          --image-id "${{ secrets.OCI_IMAGE_OCID }}" \
-          --subnet-id "${{ secrets.OCI_SUBNET_OCID }}" \
-          --ssh-authorized-keys-file ssh_key.pub \
-          --assign-public-ip true \
-          --display-name "ARM-Santiago-Instance"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Launch OCI Instance via OCI CLI
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_USER_OCID }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_CLI_REGION: "sa-santiago-1"
+        run: |
+          pip install oci-cli --quiet
+
+          # Guardar clave publica SSH limpia
+          echo "${{ secrets.OCI_SSH_PUBLIC_KEY }}" | tr -d '\r' > ssh_key.pub
+
+          # Obtener el Availability Domain dinamico de Santiago
+          AD_NAME=$(oci iam availability-domain list --query "data[0].name" --raw-output)
+          echo "Target Availability Domain: $AD_NAME"
+
+          # Intentar crear la instancia
+          oci compute instance launch \
+            --availability-domain "$AD_NAME" \
+            --compartment-id "${{ secrets.OCI_TENANCY_OCID }}" \
+            --shape "VM.Standard.A1.Flex" \
+            --shape-config '{"ocpus": 4, "memory_in_gbs": 24}' \
+            --image-id "${{ secrets.OCI_IMAGE_OCID }}" \
+            --subnet-id "${{ secrets.OCI_SUBNET_OCID }}" \
+            --ssh-authorized-keys-file ssh_key.pub \
+            --assign-public-ip true \
+            --display-name "ARM-Santiago-Instance"
